@@ -1,12 +1,25 @@
-version: ~> 1.0
 language: node_js
 os:
- - linux
-import:
- - ljharb/travis-ci:node/all.yml
- - ljharb/travis-ci:node/pretest.yml
- - ljharb/travis-ci:node/posttest.yml
- - ljharb/travis-ci:node/coverage.yml
-matrix:
-  allow_failures:
-    - env: COVERAGE=true # temporarily allow this to fail
+  - linux
+dist: xenial
+version: "~> 1.0"
+node_js:
+  - "10"
+  - "11"
+  - "12"
+  - "13"
+  - "14"
+  - "16"
+before_install:
+  - nvm install-latest-npm
+  - case "${TRAVIS_NODE_VERSION}" in 0.*) export NPM_CONFIG_STRICT_SSL=false ;; esac
+install:
+  - if [ "${TRAVIS_NODE_VERSION}" = "0.6" ] || [ "${TRAVIS_NODE_VERSION}" = "0.9"
+    ]; then nvm install --latest-npm 0.8 && npm install && nvm use "${TRAVIS_NODE_VERSION}";
+    else npm install; fi;
+script:
+  - if [ -n "${PRETEST-}" ]; then npm run pretest ; fi
+  - if [ -n "${TEST-}" ]; then npm run tests-only ; fi
+env:
+    jobs:
+      - TEST: "true"
